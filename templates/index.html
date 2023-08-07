@@ -1,49 +1,46 @@
-index.html
-
 <!DOCTYPE html>
-<html lang="ko">
-
+<html>
 <head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta charset="utf-8"/>
+	<title>Kakao 지도 시작하기</title>
+    <style>
+        #feed {
+            position: static;
+        }
+        #map {
+            position: inherit;
+        }
+    </style>
+</head>
+<body>
+    <!-- 피드 -->
+    <div id="feed">
+        <h1>
+            feed1
+        </h1>
+        <h1>
+            feed2
+        </h1>
+    </div>
+    <!-- 지도 화면 -->
+    <div id="map">
 
-    <!-- jQuery  -->
-    <script src="https://code.jquery.com/jquery-latest.min.js"></script>
+        <!-- 지도 크기 지정-->
+        <div id="map" style="width:1200px;height:630px;"></div>
+        <!-- api키를 가져온다-->
+        <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=eb7111e6861b9a4cfde6eb263dbb5ff7"></script>
+        <script>
+            var container = document.getElementById('map');
+            var options = {
+                /* 위도 경도 파일 */
+                center: new kakao.maps.LatLng(36.397110, 127.402816),
+                level: 3
+            };
 
-
-        <title>정글 푸드 피드</title>
-
-        <!-- style -->
-        <style type="text/css">
+            var map = new kakao.maps.Map(container, options);
             
-        /* desktop 규격 */
-        @media screen and (min-width: 1024px) {
-
-        }
-
-        /* tablet 규격 */
-        @media screen and (max-width: 1023px) {
-
-        }
-
-        /* mobile 규격 */
-        @media screen and (max-width: 540px) {
-
-        }
-
-        /* 가로모드 규격*/
-        @media screen and (orientation: landscape){
-
-        }
-
-        </style>
-        
-
-    </head>
-
-    <body>
-        
-    </body>
-
+        </script>
+    </div>
+    
+</body>
 </html>
