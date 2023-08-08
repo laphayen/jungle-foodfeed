@@ -4,7 +4,7 @@ from flask_jwt_extended import *
 from flask_bcrypt import Bcrypt
  
 app = Flask(__name__)
-client = MongoClient('mongodb://seungtae:jeon8175@13.125.153.232', 27017)
+client = MongoClient('mongodb://test:test@3.36.71.132', 27017)
 dblog = client.jungle_food_feed #db명
 
 app.config.update(
