@@ -158,7 +158,10 @@
                     myModal.css('display', 'block')
                 });
 
-                
+                function closeModal() {
+                    const myModal = $('.modal')
+                    myModal.css('display', 'none')
+                }
 
                 // 지도에 표시된 마커 객체를 가지고 있을 배열입니다
                 var markers = [];
