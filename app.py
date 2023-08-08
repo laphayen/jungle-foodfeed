@@ -4,7 +4,7 @@ from flask_jwt_extended import *
 from flask_bcrypt import Bcrypt
 
 app = Flask(__name__)
-client = MongoClient('localhost', 27017)
+client = MongoClient('mongodb://seungtae:jeon8175@13.125.153.232', 27017)
 dblog = client.jungle_food_feed #db명
 
 app.config.update(
@@ -23,13 +23,13 @@ def home():
 def signup():
     id = request.form['id']
     checkId = list(dblog.login.find({'id':id}))
-    print(checkId)
     if len(checkId) != 0 :
         return jsonify({'result': 'fail', 'msg':'이미 아이디가 존재합니다.'})
     pw = request.form['pw']
+    name = request.form['name']
 
     pw_hash = bcrypt.generate_password_hash(pw)
-    dblog.login.insert_one({'id':id,'pw':pw_hash})
+    dblog.login.insert_one({'id':id,'pw':pw_hash,'name':name})
     return jsonify({'result': 'success', 'msg':'회원 가입에 성공했습니다!'})
 
 @app.route('/login', methods=['POST'])
@@ -58,4 +58,4 @@ def logOut():
     return jsonify({'message': 'Token is missing'}),
 
 if __name__ == '__main__':
-   app.run('0.0.0.0',port=9000,debug=True)
+   app.run('0.0.0.0',port=5000,debug=True)
