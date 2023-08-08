@@ -23,13 +23,35 @@
     <script>
         function logOut() {
             // 이 함수가 실행되면 /logout으로 이동
-            $.removeCookie('access_token', {path: '/'});
+            $.removeCookie('access_token', { path: '/' });
             window.location.href = '/';
+        }
+        function clickLikeBtn() {
+            let placeName = $('#searchInputKeyword').val()
+            console.log(placeName)
+            $.ajax({
+                type: "POST",
+                url: "/api/like",
+                data: {'name_give': placeName},
+                success: function(response) {
+                    //저장되었습니다
+                    alert('저장되었습니다');
+                    //변경된 정보를 반영하기 위해 카드 리스트를 다시 만듭니다.
+                    // showCards();
+                }
+            });
+            
         }
     </script>
     <meta charset="utf-8" />
     <title>Jungle foodfeed</title>
     <style>
+        body {
+            overflow: hidden;
+            height: 100%;
+            width: 100%;
+        }
+
         .wrap {
             display: flex;
             flex-direction: row;
@@ -94,6 +116,7 @@
             margin-left: 10px;
             z-index: 5;
         }
+
         /* 로그아웃 버튼 */
         #logoutbtn {
             top: 20px;
@@ -101,6 +124,22 @@
             z-index: 5;
         }
 
+                        /* desktop 규격 */
+        @media screen and (min-width: 1000px) {}
+
+/* tablet 규격 */
+@media screen and (max-width: 1000px) {
+    body{
+        background-color: #c4c4c43d;
+    }
+    .input_search{
+                        position: relative;
+                        right: 0;
+                        top: 0;
+                        background-color: #c4c4c400;
+                        margin-bottom: 0;
+                    }
+}
     </style>
 </head>
 
@@ -108,7 +147,6 @@
     <!-- 사이드바 -->
     <div class="wrap">
         <!-- 로그아웃 -->
-        <button id="logoutbtn" type="button" class="btn btn-danger" onclick="logOut()">로그아웃</button>
         <div class="left">
             <div>
                 <h1 style="margin-left: 10px;">Jungle-foodfeed</h1>
@@ -128,7 +166,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="right">
             <!-- 검색창 -->
             <div class="input-group mb-3 input_search">
@@ -216,17 +254,20 @@
     <div class="modal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Modal title</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
                 <div class="modal-body">
-                    <p>Modal body text goes here.</p>
+                    <div class="input-group flex-nowrap">
+                        <span class="input-group-text" id="addon-wrapping" >상호명</span>
+                        <input id="searchInputKeyword" type="text" class="form-control" placeholder="Username" aria-label="Username" aria-describedby="addon-wrapping">
+                      </div>
                 </div>
                 <div class="modal-footer">
                     <button onclick="closeModal()" type="button" class="btn btn-secondary"
-                        data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">Save changes</button>
+                        data-bs-dismiss="modal">닫기</button>
+                    <button type="button" class="btn btn-primary" id="likeBtn" onclick="clickLikeBtn()">
+                        <span id="like-number">0</span>
+                        <img src="/static/heart_img.png" style="width: 25px; height: 25px;">
+                        
+                    </button>
                 </div>
             </div>
         </div>
