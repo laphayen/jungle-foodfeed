@@ -19,7 +19,7 @@
     <!-- 카카오맵 api-->
     <script type="text/javascript"
         src="//dapi.kakao.com/v2/maps/sdk.js?appkey=eb7111e6861b9a4cfde6eb263dbb5ff7&libraries=services,clusterer,drawing"></script>
-    
+
     <script>
         function logOut() {
             // 이 함수가 실행되면 /logout으로 이동
@@ -30,20 +30,27 @@
     <meta charset="utf-8" />
     <title>Jungle foodfeed</title>
     <style>
+        .wrap {
+            display: flex;
+            flex-direction: row;
+        }
+
         div.left {
-            float: left;
             background-color: rgba(141, 141, 141, 0.2);
             z-index: 3;
+            padding: 20px;
+            border-right: 1px solid rgb(181, 181, 181);
         }
 
         #map {
-            width: 1250px;
-            height: 100vw;
+            width: 100%;
+            height: 100vh;
             z-index: 0;
         }
 
         .right {
             z-index: 0;
+            width: 80vw;
         }
 
         .search {
@@ -61,9 +68,31 @@
             margin: 10px;
         }
 
-        .wrap {
+        #search_name {
+            width: 70%;
+            z-index: 2;
+            margin-right: 10px;
+        }
+
+        .input_search {
             display: flex;
-            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            position: fixed;
+            top: 20px;
+            z-index: 10;
+            padding: 10px;
+            width: 550px;
+            background-color: #c4c4c43d;
+            ;
+            border-radius: 10px;
+            right: 20px;
+        }
+
+        /* 로그아웃 버튼 */
+        #logoutbtn {
+            margin-left: 10px;
+            z-index: 5;
         }
         /* 로그아웃 버튼 */
         #logoutbtn {
@@ -85,13 +114,6 @@
             <div>
                 <h1 style="margin-left: 10px;">Jungle-foodfeed</h1>
             </div>
-            <!-- 검색창 -->
-            <div class="input-group mb-3" style="margin: 10px; width: 18rem;">
-                <input type="text" class="form-control" id="search_name" placeholder="맛집 검색"
-                    aria-label="Recipient's username" aria-describedby="button-addon2">
-                <button class="btn btn-outline-secondary " type="button" id="button-addon2"
-                    style="background-color: #0069D9;" onclick="search_name()">검색</button>
-            </div>
             <!-- 피드 -->
             <div class="card" style="width: 18rem;">
                 <div class="card-body">
@@ -109,6 +131,14 @@
         </div>
         
         <div class="right">
+            <!-- 검색창 -->
+            <div class="input-group mb-3 input_search">
+                <input type="text" class="form-control" id="search_name" placeholder="맛집 검색"
+                    aria-label="Recipient's username" aria-describedby="button-addon2">
+                <button class="btn btn-primary " type="button" id="button-addon2" onclick="search_name()">검색</button>
+                <!-- 로그아웃 -->
+                <button id="logoutbtn" type="button" class="btn btn-danger" onclick="logOut()">로그아웃</button>
+            </div>
             <div>
                 <!-- 지도 크기 지정-->
                 <div id="map"></div>

@@ -50,17 +50,5 @@ def login():
         return jsonify({'result': 'success', 'id':id,'msg':'로그인 되었습니다!', 'access_token' : create_access_token(identity = id,
 											expires_delta = False)})
 
-"""
-# 로그아웃 api
-@app.route('/logout', methods=['GET'])
-def logout_proc():
-    jwt_token = request.cookies.get('access_token')
-    jwt_blocklist = set()
-    jti = decode_token(jwt_token)['jti']
-    jwt_blocklist.add(jti) # 로그인 user의 jti를 blocklist에 등록
-    
-    return jsonify({'result': 'success', 'msg': '로그아웃 성공!'})
-
-"""
 if __name__ == '__main__':
     app.run('0.0.0.0',port=5000,debug=True)
