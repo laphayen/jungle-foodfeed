@@ -19,6 +19,11 @@ jwt = JWTManager(app)
 def home():
    return render_template('login.html')
 
+@app.route('/main')
+def main():
+   return render_template('index.html')
+
+
 @app.route('/signup', methods=['POST'])
 def signup():
     id = request.form['id']
@@ -44,6 +49,7 @@ def login():
     else :
         return jsonify({'result': 'success', 'id':id,'msg':'로그인 되었습니다!', 'access_token' : create_access_token(identity = id,
 											expires_delta = False)})
+    
     
 @app.route('/logout')
 def logOut():
