@@ -14,10 +14,19 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-Piv4xVNRyMGpqkS2by6br4gNJ7DXjqk09RmUpJ8jgGtD7zP9yug3goQfGII0yAns"
         crossorigin="anonymous"></script>
+    <!-- 쿠키 제거 스크립트-->
+    <script src=" https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
     <!-- 카카오맵 api-->
     <script type="text/javascript"
         src="//dapi.kakao.com/v2/maps/sdk.js?appkey=eb7111e6861b9a4cfde6eb263dbb5ff7&libraries=services,clusterer,drawing"></script>
-
+    
+    <script>
+        function logOut() {
+            // 이 함수가 실행되면 /logout으로 이동
+            $.removeCookie('access_token', {path: '/'});
+            window.location.href = '/';
+        }
+    </script>
     <meta charset="utf-8" />
     <title>Jungle foodfeed</title>
     <style>
@@ -56,12 +65,22 @@
             display: flex;
             flex-direction: row;
         }
+        /* 로그아웃 버튼 */
+        #logoutbtn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 5;
+        }
+
     </style>
 </head>
 
 <body>
     <!-- 사이드바 -->
     <div class="wrap">
+        <!-- 로그아웃 -->
+        <button id="logoutbtn" type="button" class="btn btn-danger" onclick="logOut()">로그아웃</button>
         <div class="left">
             <div>
                 <h1 style="margin-left: 10px;">Jungle-foodfeed</h1>
@@ -88,7 +107,7 @@
                 </div>
             </div>
         </div>
-
+        
         <div class="right">
             <div>
                 <!-- 지도 크기 지정-->
