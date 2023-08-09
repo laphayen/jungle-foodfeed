@@ -210,6 +210,9 @@
                         }
                         addMarker(mouseEvent.latLng);
                         console.log(1)
+                        //모달창 
+                        const myModal = $('.modal')
+                        myModal.css('display', 'block')
 
                         //클릭한 마커의 위치
                         var divx = $('[title=clickedMarker]').offset().left
