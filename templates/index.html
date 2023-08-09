@@ -34,7 +34,7 @@
             $.ajax({
                 type: "POST",
                 url: "/api/like",
-                data: { 'name_give': placeName, 'loca_give': addrRes},
+                data: { 'name_give': placeName, 'loca_give': addrRes },
                 success: function (response) {
                     //저장되었습니다
                     alert('저장되었습니다');
@@ -206,17 +206,62 @@
                     // 주소 모듈 임포트
                     var geocoder = new kakao.maps.services.Geocoder();
 
-                    function getAdrr(x,y) {
+                    function getAdrr(x, y, is_type) {
                         // 좌표를 넣어준다
                         var coord = new kakao.maps.LatLng(x, y);
                         // 콜백함수
                         var callback = function (result, status) {
                             if (status === kakao.maps.services.Status.OK) {
                                 addrRes = result[0].address.address_name;
-                            }
+                                if (is_type == 'search') {
+                                    infowindow.setContent(`
+          <div class="modal-content">
+            <div class="modal-body">
+                <div class="input-group flex-nowrap">
+                    <span class="input-group-text" id="addon-wrapping">상호명</span>
+                    <input id="searchInputKeyword" type="text" class="form-control" placeholder="상호명을 입력해주세요"
+                        aria-label="Username" aria-describedby="addon-wrapping" value="${place.place_name}">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button onclick="closeModal()" type="button" class="btn btn-secondary"
+                    data-bs-dismiss="modal">닫기</button>
+                <button type="button" class="btn btn-primary" id="likeBtn" onclick="clickLikeBtn()">
+                    <span id="like-number">0</span>
+                    <img src="/static/heart_img.png" style="width: 25px; height: 25px;">
+
+                </button>
+            </div>
+          </div>
+`)
+                                } else {
+                                    infowindow.setContent(`
+          <div class="modal-content">
+            <div class="modal-body">
+                <div class="input-group flex-nowrap">
+                    <span class="input-group-text" id="addon-wrapping">상호명</span>
+                    <input id="searchInputKeyword" type="text" class="form-control" placeholder="상호명을 입력해주세요"
+                        aria-label="Username" aria-describedby="addon-wrapping" value="${result[0].address.address_name}">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button onclick="closeModalAndDel()" type="button" class="btn btn-danger"
+                    data-bs-dismiss="modal">삭제</button>
+                <button onclick="closeModal()" type="button" class="btn btn-secondary"
+                    data-bs-dismiss="modal">닫기</button>
+                <button type="button" class="btn btn-primary" id="likeBtn" onclick="clickLikeBtn()">
+                    <span id="like-number">0</span>
+                    <img src="/static/heart_img.png" style="width: 25px; height: 25px;">
+
+                </button>
+            </div>
+          </div>
+`)}
+                                
+                    }
                         };
-                        // 처리 및 출력부
-                        return geocoder.coord2Address(coord.getLng(), coord.getLat(), callback);
+                    // 처리 및 출력부
+                    return geocoder.coord2Address(coord.getLng(), coord.getLat(), callback);
                     }
 
                     // 좌표를 넣어준다
@@ -317,53 +362,12 @@
                             // 마커를 클릭하면 장소명이 인포윈도우에 표출됩니다
                             if (is_type == 'search') {
                                 console.log('search' + place.y, place.x)
-                                getAdrr(place.y, place.x)
                                 hideMarkers()
-                                infowindow.setContent(`
-          <div class="modal-content">
-            <div class="modal-body">
-                <div class="input-group flex-nowrap">
-                    <span class="input-group-text" id="addon-wrapping">상호명</span>
-                    <input id="searchInputKeyword" type="text" class="form-control" placeholder="상호명을 입력해주세요"
-                        aria-label="Username" aria-describedby="addon-wrapping" value="${place.place_name}">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button onclick="closeModal()" type="button" class="btn btn-secondary"
-                    data-bs-dismiss="modal">닫기</button>
-                <button type="button" class="btn btn-primary" id="likeBtn" onclick="clickLikeBtn()">
-                    <span id="like-number">0</span>
-                    <img src="/static/heart_img.png" style="width: 25px; height: 25px;">
+                                getAdrr(place.y, place.x, 'search')
 
-                </button>
-            </div>
-          </div>
-`);
                             } else {
                                 console.log('click' + place['Ma'], place['La'])
-                                getAdrr(place['Ma'], place['La'])
-                                infowindow.setContent(`
-          <div class="modal-content">
-            <div class="modal-body">
-                <div class="input-group flex-nowrap">
-                    <span class="input-group-text" id="addon-wrapping">상호명</span>
-                    <input id="searchInputKeyword" type="text" class="form-control" placeholder="상호명을 입력해주세요"
-                        aria-label="Username" aria-describedby="addon-wrapping" value="test">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button onclick="closeModalAndDel()" type="button" class="btn btn-danger"
-                    data-bs-dismiss="modal">삭제</button>
-                <button onclick="closeModal()" type="button" class="btn btn-secondary"
-                    data-bs-dismiss="modal">닫기</button>
-                <button type="button" class="btn btn-primary" id="likeBtn" onclick="clickLikeBtn()">
-                    <span id="like-number">0</span>
-                    <img src="/static/heart_img.png" style="width: 25px; height: 25px;">
-
-                </button>
-            </div>
-          </div>
-`);
+                                getAdrr(place['Ma'], place['La'], 'click')
                             }
                             infowindow.open(map, marker);
                         });
