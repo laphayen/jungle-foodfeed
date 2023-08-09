@@ -185,6 +185,7 @@
                 <div id="map"></div>
                 <!-- api키를 가져온다-->
                 <script>
+                    var infowindow = new kakao.maps.InfoWindow({zIndex:1});
                     var mapContainer = document.getElementById('map'), // 지도를 표시할 div 
                         mapOption = {
                             center: new kakao.maps.LatLng(36.392110, 127.404816), // 지도의 중심좌표
@@ -209,14 +210,18 @@
                         }
                         addMarker(mouseEvent.latLng);
                         console.log(1)
-                        //모달창 
-                        const myModal = $('.modal')
-                        myModal.css('display', 'block')
+
+                        //클릭한 마커의 위치
+                        var divx = $('[title=clickedMarker]').offset().left
+                        var divy = $('[title=clickedMarker]').offset().top
+
+                        myModal.css('top',`${divy}px`)
+                        myModal.css('left',`${divx + 20}px`)
                         is_marker = true
                     });
 
                     function closeModal() {
-                        const myModal = $('.modal')
+                        const myModal = $('.modal-content')
                         myModal.css('display', 'none')
                     }
                     // 장소 검색 객체를 생성합니다
@@ -271,7 +276,26 @@
                         // 마커에 클릭이벤트를 등록합니다
                         kakao.maps.event.addListener(marker, 'click', function () {
                             // 마커를 클릭하면 장소명이 인포윈도우에 표출됩니다
-                            infowindow.setContent('<div style="padding:5px;font-size:12px;">' + place.place_name + '</div>');
+                            infowindow.setContent(`
+          <div class="modal-content">
+            <div class="modal-body">
+                <div class="input-group flex-nowrap">
+                    <span class="input-group-text" id="addon-wrapping">상호명</span>
+                    <input id="searchInputKeyword" type="text" class="form-control" placeholder="상호명을 입력해주세요"
+                        aria-label="Username" aria-describedby="addon-wrapping" value="${place.placeName}">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button onclick="closeModal()" type="button" class="btn btn-secondary"
+                    data-bs-dismiss="modal">닫기</button>
+                <button type="button" class="btn btn-primary" id="likeBtn" onclick="clickLikeBtn()">
+                    <span id="like-number">0</span>
+                    <img src="/static/heart_img.png" style="width: 25px; height: 25px;">
+
+                </button>
+            </div>
+          </div>
+`);
                             infowindow.open(map, marker);
                         });
                     }
@@ -315,31 +339,6 @@
                     }
 
                 </script>
-            </div>
-        </div>
-    </div>
-    <!-- 지도 화면 -->
-
-    <!--모달 창-->
-    <div class="modal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body">
-                    <div class="input-group flex-nowrap">
-                        <span class="input-group-text" id="addon-wrapping">상호명</span>
-                        <input id="searchInputKeyword" type="text" class="form-control" placeholder="상호명을 입력해주세요"
-                            aria-label="Username" aria-describedby="addon-wrapping">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button onclick="closeModal()" type="button" class="btn btn-secondary"
-                        data-bs-dismiss="modal">닫기</button>
-                    <button type="button" class="btn btn-primary" id="likeBtn" onclick="clickLikeBtn()">
-                        <span id="like-number">0</span>
-                        <img src="/static/heart_img.png" style="width: 25px; height: 25px;">
-
-                    </button>
-                </div>
             </div>
         </div>
     </div>
