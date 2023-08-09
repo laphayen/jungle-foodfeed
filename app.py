@@ -56,9 +56,11 @@ def like_feed():
    #클라이언트가 전달한 name_give를 name_receive 변수에 넣기
    print(1)
    name_receive = request.form['name_give']
+   loca_receive = request.form['loca_give']
    print(1)
    feed_data = {
-      'place_name' : name_receive
+      'place_name' : name_receive,
+      'loca' : loca_receive
    }
    #MongoDB에 데이터 넣기
    dblog.feeds.insert_one(feed_data)
