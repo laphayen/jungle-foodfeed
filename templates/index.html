@@ -224,8 +224,7 @@
                     });
 
                     function closeModal() {
-                        const myModal = $('.modal-content')
-                        myModal.css('display', 'none')
+                        infowindow.close();
                     }
                     // 장소 검색 객체를 생성합니다
                     var ps = new kakao.maps.services.Places();
