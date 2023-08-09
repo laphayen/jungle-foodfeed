@@ -21,10 +21,10 @@
 
     <script>
         let addrRes = ''
+        let curFeed = {}
         $(document).ready(function () {
             // index.html 로드가 완료되면 자동으로 showFeeds() 함수를 호출합니다.
             showFeeds();
-            console.log(getCookie("access_token_cookie"));
         });
         //카드 생성
         function showFeeds() {
@@ -47,8 +47,14 @@
                             let name = feed['name']
                             let like = feed['like']
                             let loca = feed['loca']
-
-                            let tempHtml = `
+                            let ids = feed['ID']
+                            let is_contain = false
+                            for(let i = 0;i < ids.length;i++){
+                                if(ids[i] == $('#id').val())is_contain = true
+                            }
+                            let tempHtml = ''
+                            if (is_contain){
+                                tempHtml = `
                             <div class="card" style="width: 18rem;">
                                 <div class="card-body">
                                     <h5 class="card-title">${name}</h5>
@@ -62,6 +68,22 @@
                                 </div>
                             </div>
                             `
+                            }else{
+                                tempHtml = `
+                            <div class="card" style="width: 18rem;">
+                                <div class="card-body">
+                                    <h5 class="card-title">${name}</h5>
+                                    <p class="card-text">${loca}</p>
+                                    <div style="display: inline-block;">
+                                        <a href="#" class="btn btn-secondary" onclick="clickFeedLikeBtn('${name}', '${loca}')">
+                                            좋아요 ${like}
+                                            <img src="/static/heart_img.png" style="width: 25px; height: 25px;">
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            `
+                            }
                             $('.card-columns').append(tempHtml)
                             
                     }
@@ -82,7 +104,7 @@
             $.ajax({
                 type: "POST",
                 url: "/api/like",
-                data: { 'name_give': placeName, 'loca_give': addrRes ,'ID_give':'awdf'},
+                data: { 'name_give': placeName, 'loca_give': addrRes ,'ID_give':$('#id').val()},
                 success: function (response) {
                     if (response['result'] == 'success') {
                         alert(response['msg']);
@@ -102,7 +124,7 @@
             $.ajax({
                 type: 'POST',
                 url: '/api/like',
-                data: { 'name_give': name, 'loca_give': loca ,'ID_give':'awdf'},
+                data: { 'name_give': name, 'loca_give': loca ,'ID_give':$('#id').val()},
                 success: function (response) {
                     if (response['result'] == 'success') {
                         alert(response['msg']);
@@ -278,6 +300,7 @@
 <body>
     <!-- 사이드바 -->
     <div class="wrap">
+        <input id="id" hidden value="{{id}}">
         <!-- 로그아웃 -->
         <div class="left">
             <div>
@@ -353,7 +376,6 @@
                 <button onclick="closeModal()" type="button" class="btn btn-secondary"
                     data-bs-dismiss="modal">닫기</button>
                 <button type="button" class="btn btn-primary" id="likeBtn" onclick="clickLikeBtn()">
-                    <span id="like-number">0</span>
                     <img src="/static/heart_img.png" style="width: 25px; height: 25px;">
 
                 </button>
@@ -382,7 +404,6 @@
                 <button onclick="closeModal()" type="button" class="btn btn-secondary"
                     data-bs-dismiss="modal">닫기</button>
                 <button type="button" class="btn btn-primary" id="likeBtn" onclick="clickLikeBtn()">
-                    <span id="like-number">0</span>
                     <img src="/static/heart_img.png" style="width: 25px; height: 25px;">
 
                 </button>
