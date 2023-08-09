@@ -35,15 +35,15 @@
             $.ajax({
                 type: "POST",
                 url: "/api/like",
-                data: {'name_give': placeName},
-                success: function(response) {
+                data: { 'name_give': placeName },
+                success: function (response) {
                     //저장되었습니다
                     alert('저장되었습니다');
                     //변경된 정보를 반영하기 위해 카드 리스트를 다시 만듭니다.
                     // showCards();
                 }
             });
-            
+
         }
     </script>
     <meta charset="utf-8" />
@@ -127,22 +127,23 @@
             z-index: 5;
         }
 
-                        /* desktop 규격 */
+        /* desktop 규격 */
         @media screen and (min-width: 1000px) {}
 
-/* tablet 규격 */
-@media screen and (max-width: 1000px) {
-    body{
-        background-color: #c4c4c43d;
-    }
-    .input_search{
-                        position: relative;
-                        right: 0;
-                        top: 0;
-                        background-color: #c4c4c400;
-                        margin-bottom: 0;
-                    }
-}
+        /* tablet 규격 */
+        @media screen and (max-width: 1000px) {
+            body {
+                background-color: #c4c4c43d;
+            }
+
+            .input_search {
+                position: relative;
+                right: 0;
+                top: 0;
+                background-color: #c4c4c400;
+                margin-bottom: 0;
+            }
+        }
     </style>
 </head>
 
@@ -189,7 +190,7 @@
                             center: new kakao.maps.LatLng(36.392110, 127.404816), // 지도의 중심좌표
                             level: 4 // 지도의 확대 레벨
                         };
-    
+
                     // 지도를 옵션으로 생성한다. 
                     var map = new kakao.maps.Map(mapContainer, mapOption); // 지도를 생성합니다
                     var sw = new kakao.maps.LatLng(36.404878, 127.412622), ne = new kakao.maps.LatLng(36.3899, 127.392);
@@ -197,15 +198,14 @@
                     // LatLngBounds 객체에 좌표를 추가합니다
                     var bounds = new kakao.maps.LatLngBounds(sw, ne);
                     map.setBounds(bounds);
-    
+
                     var is_marker = false
                     // 지도를 클릭했을때 클릭한 위치에 마커를 추가하도록 지도에 클릭이벤트를 등록합니다
                     kakao.maps.event.addListener(map, 'click', function (mouseEvent) {
                         // 클릭한 위치에 마커를 표시합니다 
-                        if (is_marker){ // 클릭하여 생성된 마커가 없을 때
+                        if (is_marker) { // 클릭하여 생성된 마커가 없을 때
                             // 기존 클릭 마커 제거
                             hideMarkers()
-                            markers.pop();
                         }
                         addMarker(mouseEvent.latLng);
                         console.log(1)
@@ -214,7 +214,7 @@
                         myModal.css('display', 'block')
                         is_marker = true
                     });
-    
+
                     function closeModal() {
                         const myModal = $('.modal')
                         myModal.css('display', 'none')
@@ -222,45 +222,52 @@
                     // 장소 검색 객체를 생성합니다
                     var ps = new kakao.maps.services.Places();
                     ps.setMap(map);
-    
+
+
+                    let search_count = 0
                     function search_name() {
                         // 키워드로 장소를 검색합니다
                         ps.keywordSearch('대전 유성구 전민동' + $('#search_name').val(), placesSearchCB, useMapBounds = true);
                         ps.keywordSearch('대전 유성구 문지동' + $('#search_name').val(), placesSearchCB, useMapBounds = true);
+                        search_count = 0
                     }
                     ////
                     // 키워드 검색 완료 시 호출되는 콜백함수 입니다
                     function placesSearchCB(data, status, pagination) {
                         if (status === kakao.maps.services.Status.OK) {
-                            if (status === kakao.maps.services.Status.OK) {
-                                // 데이터 확인
-                                console.log(data);
-                            } else if (status === kakao.maps.services.Status.ZERO_RESULT) {
+                            // 데이터 확인
+                            console.log(data);
+                        } else if (status === kakao.maps.services.Status.ZERO_RESULT) {
+                            if (search_count == 0) {
                                 alert('검색 결과가 존재하지 않습니다.');
-                                return;
-                            } else if (status === kakao.maps.services.Status.ERROR) {
+                                search_count++
+                            }
+                            return;
+                        } else if (status === kakao.maps.services.Status.ERROR) {
+                            if (search_count == 0) {
                                 alert('검색 결과 중 오류가 발생했습니다.');
-                                return;
+                                search_count++
                             }
-    
-                            for (var i = 0; i < data.length; i++) {
-                                displayMarker(data[i]);
-                            }
-    
-                            // 검색된 장소 위치를 기준으로 지도 범위를 재설정합니다
-                            map.setBounds(bounds);
+                            return;
                         }
+                        hideMarkers()
+
+                        for (var i = 0; i < data.length; i++) {
+                            displayMarker(data[i]);
+                        }
+                        // 검색된 장소 위치를 기준으로 지도 범위를 재설정합니다
+                        map.setBounds(bounds);
                     }
-    
+
                     // 지도에 마커를 표시하는 함수입니다
                     function displayMarker(place) {
-    
+
                         // 마커를 생성하고 지도에 표시합니다
                         var marker = new kakao.maps.Marker({
                             map: map,
                             position: new kakao.maps.LatLng(place.y, place.x)
                         });
-    
+
                         // 마커에 클릭이벤트를 등록합니다
                         kakao.maps.event.addListener(marker, 'click', function () {
                             // 마커를 클릭하면 장소명이 인포윈도우에 표출됩니다
@@ -268,44 +275,45 @@
                             infowindow.open(map, marker);
                         });
                     }
-    
+
                     // 지도에 표시된 마커 객체를 가지고 있을 배열입니다
                     var markers = [];
-    
-    
+
+
                     // 마커를 생성하고 지도위에 표시하는 함수입니다
                     function addMarker(position) {
                         console.log(is_marker)
                         // 마커를 생성합니다
                         var marker = new kakao.maps.Marker({
                             position: position,
-                            title : 'clickedMarker',
-                            draggable : true
+                            title: 'clickedMarker',
+                            draggable: true
                         });
-    
+
                         // 마커가 지도 위에 표시되도록 설정합니다
                         marker.setMap(map);
 
                         markers.push(marker);
                     }
-    
+
                     // 배열에 추가된 마커들을 지도에 표시하거나 삭제하는 함수입니다
                     function setMarkers(map) {
                         for (var i = 0; i < markers.length; i++) {
                             markers[i].setMap(map);
                         }
                     }
-    
+
                     // "마커 보이기" 버튼을 클릭하면 호출되어 배열에 추가된 마커를 지도에 표시하는 함수입니다
                     function showMarkers() {
                         setMarkers(map)
                     }
-    
+
                     // "마커 감추기" 버튼을 클릭하면 호출되어 배열에 추가된 마커를 지도에서 삭제하는 함수입니다
                     function hideMarkers() {
                         setMarkers(null);
+                        markers.pop();
                     }
-    
+
                 </script>
             </div>
         </div>
@@ -318,9 +326,10 @@
             <div class="modal-content">
                 <div class="modal-body">
                     <div class="input-group flex-nowrap">
-                        <span class="input-group-text" id="addon-wrapping" >상호명</span>
-                        <input id="searchInputKeyword" type="text" class="form-control" placeholder="상호명을 입력해주세요" aria-label="Username" aria-describedby="addon-wrapping">
-                      </div>
+                        <span class="input-group-text" id="addon-wrapping">상호명</span>
+                        <input id="searchInputKeyword" type="text" class="form-control" placeholder="상호명을 입력해주세요"
+                            aria-label="Username" aria-describedby="addon-wrapping">
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button onclick="closeModal()" type="button" class="btn btn-secondary"
@@ -328,7 +337,7 @@
                     <button type="button" class="btn btn-primary" id="likeBtn" onclick="clickLikeBtn()">
                         <span id="like-number">0</span>
                         <img src="/static/heart_img.png" style="width: 25px; height: 25px;">
-                        
+
                     </button>
                 </div>
             </div>
