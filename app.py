@@ -24,6 +24,10 @@ def home():
 def main():
    return render_template('index.html')
 
+@app.route('/logOut')
+def logOut():
+   return render_template('login.html')
+
 
 @app.route('/signup', methods=['POST'])
 def signup():
