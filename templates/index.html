@@ -86,6 +86,15 @@
         /* 모달 */
         .modal-content {
             z-index: 15;
+            border: 0;
+            border-radius: 0;
+        }
+
+        .modal-footer{
+            padding: 0;
+            border-bottom: 0.1px solid black;
+            border-bottom-right-radius:0 ;
+            border-bottom-left-radius:0 ;
         }
 
         /* 피드 */
@@ -209,11 +218,9 @@
                             // 기존 클릭 마커 제거
                             hideMarkers()
                         }
-                        addMarker(mouseEvent.latLng);
+                        displayMarker(mouseEvent.latLng, 'click');
 
                         is_marker = true
-
-                        displayMarker()
                     });
 
                     function closeModal() {
@@ -230,6 +237,7 @@
                         ps.keywordSearch('대전 유성구 전민동' + $('#search_name').val(), placesSearchCB, useMapBounds = true);
                         ps.keywordSearch('대전 유성구 문지동' + $('#search_name').val(), placesSearchCB, useMapBounds = true);
                         search_count = 0
+                        closeModal()
                     }
                     ////
                     // 키워드 검색 완료 시 호출되는 콜백함수 입니다
@@ -253,26 +261,40 @@
                         hideMarkers()
 
                         for (var i = 0; i < data.length; i++) {
-                            displayMarker(data[i]);
+                            displayMarker(data[i], 'search');
                         }
                         // 검색된 장소 위치를 기준으로 지도 범위를 재설정합니다
                         map.setBounds(bounds);
                     }
 
                     // 지도에 마커를 표시하는 함수입니다
-                    function displayMarker(place) {
+                    function displayMarker(place, is_type) {
                         // 마커를 생성하고 지도에 표시합니다
-                        var marker = new kakao.maps.Marker({
-                            map: map,
-                            position: new kakao.maps.LatLng(place.y, place.x)
-                        });
+                        if (is_type == 'search') {
+                            var marker = new kakao.maps.Marker({
+                                map: map,
+                                position: new kakao.maps.LatLng(place.y, place.x)
+                            });
+                        } else {
+                            var marker = new kakao.maps.Marker({
+                                position: place,
+                                title: 'clickedMarker',
+                                draggable: true
+                            });
+
+                            // 마커가 지도 위에 표시되도록 설정합니다
+                            marker.setMap(map);
+
+                            markers.push(marker);
+                        }
 
                         // 마커에 클릭이벤트를 등록합니다
                         kakao.maps.event.addListener(marker, 'click', function () {
                             //기존에 클릭으로 만들어놓은 마커 제거
-                            hideMarkers()
                             // 마커를 클릭하면 장소명이 인포윈도우에 표출됩니다
-                            infowindow.setContent(`
+                            if (is_type == 'search') {
+                                hideMarkers()
+                                infowindow.setContent(`
           <div class="modal-content">
             <div class="modal-body">
                 <div class="input-group flex-nowrap">
@@ -292,6 +314,28 @@
             </div>
           </div>
 `);
+                            } else {
+                                infowindow.setContent(`
+          <div class="modal-content">
+            <div class="modal-body">
+                <div class="input-group flex-nowrap">
+                    <span class="input-group-text" id="addon-wrapping">상호명</span>
+                    <input id="searchInputKeyword" type="text" class="form-control" placeholder="상호명을 입력해주세요"
+                        aria-label="Username" aria-describedby="addon-wrapping" value="test">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button onclick="closeModal()" type="button" class="btn btn-secondary"
+                    data-bs-dismiss="modal">닫기</button>
+                <button type="button" class="btn btn-primary" id="likeBtn" onclick="clickLikeBtn()">
+                    <span id="like-number">0</span>
+                    <img src="/static/heart_img.png" style="width: 25px; height: 25px;">
+
+                </button>
+            </div>
+          </div>
+`);
+                            }
                             infowindow.open(map, marker);
                         });
                     }
@@ -300,21 +344,6 @@
                     var markers = [];
 
 
-                    // 마커를 생성하고 지도위에 표시하는 함수입니다
-                    function addMarker(position) {
-                        console.log(is_marker)
-                        // 마커를 생성합니다
-                        var marker = new kakao.maps.Marker({
-                            position: position,
-                            title: 'clickedMarker',
-                            draggable: true
-                        });
-
-                        // 마커가 지도 위에 표시되도록 설정합니다
-                        marker.setMap(map);
-
-                        markers.push(marker);
-                    }
 
                     // 배열에 추가된 마커들을 지도에 표시하거나 삭제하는 함수입니다
                     function setMarkers(map) {
