@@ -24,6 +24,7 @@
         $(document).ready(function () {
             // index.html 로드가 완료되면 자동으로 showFeeds() 함수를 호출합니다.
             showFeeds();
+            console.log(getCookie("access_token_cookie"));
         });
         //카드 생성
         function showFeeds() {

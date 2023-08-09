@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify ,make_response, redirect, url_for
 from pymongo import MongoClient
 from flask_jwt_extended import *
 from flask_bcrypt import Bcrypt
@@ -26,7 +26,10 @@ def main():
 
 @app.route('/logOut')
 def logOut():
-   return render_template('login.html')
+    response = make_response(redirect(url_for('home'))) 
+    response.set_cookie('refresh_token_cookie', '', expires=-1) 
+    response.set_cookie('access_token_cookie', '', expires=-1) 
+    return response
 
 
 @app.route('/signup', methods=['POST'])
