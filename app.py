@@ -80,7 +80,8 @@ def like_feed():
    name_receive = request.form['name_give']
    loca_receive = request.form['loca_give']
    ID_receive = request.form['ID_give']
-   print(ID_receive, name_receive, loca_receive)
+   comment_receive = request.form['comment_give']
+   print(ID_receive, name_receive, loca_receive,comment_receive)
    #MongoDB에 데이터 넣기
    #find_one으로 일치하는 데이터 있는지 찾고, 있으면 좋아요 +1
    feed = dblog.feeds.find_one({'name':name_receive, 'loca':loca_receive})
@@ -97,6 +98,8 @@ def like_feed():
          minus_like = feed['like'] - 1
          #마이너스한 좋아요 수 업데이트
          dblog.feeds.update_one({'name': name_receive, 'loca':loca_receive}, {'$set': {'like': minus_like}})
+         #댓글삭제
+         dblog.feeds.update_one({'name': name_receive, 'loca':loca_receive}, {'$unset': {'Comment.' + str(ID_receive): 1}})
          #DB에서 ID 삭제
          if checkID and isinstance(checkID['ID'], list):
             #배열일 경우 하나만 삭제
@@ -115,6 +118,7 @@ def like_feed():
          plus_like = feed['like'] + 1
          #plus한 좋아요 수 업데이트
          dblog.feeds.update_one({'name': name_receive, 'loca':loca_receive}, {'$set': {'like': plus_like}})
+         dblog.feeds.update_one({'name': name_receive, 'loca':loca_receive}, {'$set': {f'Comment.{ID_receive}': comment_receive},'$addToSet': {'ID': ID_receive}})
          #DB에서 ID 추가
          dblog.feeds.update_one({'name': name_receive, 'loca':loca_receive}, {'$push':{'ID':ID_receive}})
          return jsonify({'result':'success', 'msg':'좋아요 완료'})
@@ -122,7 +126,7 @@ def like_feed():
    else:
       print('카드 최초 업데이트')
       #해당 DB에 최초로 상호가 등록된거니까 바로 insert
-      dblog.feeds.insert_one({'name':name_receive, 'like':1, 'loca': loca_receive, 'ID':[ID_receive]})
+      dblog.feeds.insert_one({'name':name_receive, 'like':1, 'loca': loca_receive, 'ID':[ID_receive], 'Comment':{ID_receive: comment_receive}})
    
       return jsonify({'result':'success', 'msg':'좋아요 완료'})
 
@@ -136,6 +140,25 @@ def show_feeds():
 
    #성공하면 feeds_list 목록을 클라이언트에 전달
    return jsonify({'result':'success', 'feeds_list':feed})
+
+@app.route('/api/comment', methods=['POST'])
+def show_comment():
+   name_receive = request.form['name_give']
+   loca_receive = request.form['loca_give']
+   feed = dblog.feeds.find_one({'name':name_receive, 'loca':loca_receive})
+   
+   comment = feed.get('Comment')
+   if comment:
+      id_list = []
+      
+      comment_list = []
+      for key, value in comment.items():
+         id_list.append(key)
+         comment_list.append(value)
+      print(comment_list)
+      return jsonify({'result':'success', 'id_list':id_list, 'comment_list':comment_list})
+   else:
+      return jsonify({'result':'None', 'msg': '댓글이 없습니다'})
 
 
 if __name__ == '__main__':
