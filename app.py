@@ -1,7 +1,8 @@
-from flask import Flask, render_template, request, jsonify ,make_response, redirect, url_for
+from flask import Flask, render_template, request, jsonify ,make_response, redirect, url_for, session
 from pymongo import MongoClient
 from flask_jwt_extended import *
 from flask_bcrypt import Bcrypt
+import random
  
 app = Flask(__name__)
 client = MongoClient('mongodb://seungtae:jeon8175@13.125.153.232', 27017)
@@ -14,6 +15,7 @@ app.config.update(
 		)
 bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
+app.secret_key = str(random.randrange(1, 100000))
 
 ## HTML을 주는 부분
 @app.route('/')
@@ -22,7 +24,8 @@ def home():
 
 @app.route('/main')
 def main():
-   return render_template('index.html')
+   print(session['id'])
+   return render_template('index.html',id=session['id'])
 
 @app.route('/logOut')
 def logOut():
@@ -48,6 +51,7 @@ def signup():
 @app.route('/login', methods=['POST'])
 def login():
     id = request.form['id']
+    session['id'] = id
     pw = request.form['pw']
     checkUser = list(dblog.login.find({'id':id}))
     
