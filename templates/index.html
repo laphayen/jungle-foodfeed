@@ -23,27 +23,103 @@
 
     <script>
         let addrRes = ''
+        $(document).ready(function () {
+            // index.html 로드가 완료되면 자동으로 showFeeds() 함수를 호출합니다.
+            showFeeds();
+        });
+        //카드 생성
+        function showFeeds() {
+            //1. .card-columns 의 내부 html 태그를 모두 삭제
+            $('.card-columns').empty()
+
+            //2. 서버에 1)GET 방식으로, 2)/api/list 라는 주소로 feed_list를 요청합니다.
+            $.ajax({
+                type: 'GET',
+                url: '/api/list',
+                data: {},
+                success: function(response) {
+                    //3. 서버가 돌려준 feed_list를 feeds라는 변수에 저장합니다.
+                    let feeds = response['feeds_list']
+                    console.log(feeds)
+                    // 4. for 문을 활용하여 feeds 배열의 요소를 차례대로 조회합니다.
+                    for (let i = 0; i < feeds.length; i++) {
+                            let feed = feeds[i]
+                            // 5. star[i] 요소의 name, url, img_url, recent, like 키 값을 활용하여 값을 조회합니다.
+                            let name = feed['name']
+                            let like = feed['like']
+                            let loca = feed['loca']
+
+                            let tempHtml = `
+                            <div class="card" style="width: 18rem;">
+                                <div class="card-body">
+                                    <h5 class="card-title">${name}</h5>
+                                    <p class="card-text">${loca}</p>
+                                    <div style="display: inline-block;">
+                                        <a href="#" class="btn btn-primary" onclick="clickFeedLikeBtn('${name}', '${loca}')">
+                                            좋아요 ${like}
+                                            <img src="/static/heart_img.png" style="width: 25px; height: 25px;">
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            `
+                            $('.card-columns').append(tempHtml)
+                            
+                    }
+                }
+            });
+        }
         function logOut() {
             // 이 함수가 실행되면 /logout으로 이동
             $.removeCookie('access_token', { path: '/' });
             window.location.href = '/';
         }
         function clickLikeBtn() {
-            let placeName = $('#searchInputKeyword').val()
+            let placeName = ''
+            if($('.search_title').text() == '' ){
+                placeName = $('.search_title').val()
+            } else{
+                placeName = $('.search_title').text()
+            }
             console.log(placeName)
             $.ajax({
                 type: "POST",
                 url: "/api/like",
-                data: { 'name_give': placeName, 'loca_give': addrRes },
+                data: { 'name_give': placeName, 'loca_give': addrRes ,'ID_give':'awdf'},
                 success: function (response) {
-                    //저장되었습니다
-                    alert('저장되었습니다');
-                    //변경된 정보를 반영하기 위해 카드 리스트를 다시 만듭니다.
-                    // showCards();
+                    if (response['result'] == 'success') {
+                        alert(response['msg']);
+                        
+                    }
+                    else {
+                        alert(response['msg']);
+                        
+                    }
+                    showFeeds();
                 }
             });
 
         }
+        function clickFeedLikeBtn(name, loca) {
+            console.log(name, loca)
+            $.ajax({
+                type: 'POST',
+                url: '/api/like',
+                data: { 'name_give': name, 'loca_give': loca ,'ID_give':'awdf'},
+                success: function (response) {
+                    if (response['result'] == 'success') {
+                        alert(response['msg']);
+                        
+                    }
+                    else {
+                        alert(response['msg']);
+                        
+                    }
+                    showFeeds();
+                }
+            });
+        }
+    
     </script>
     <meta charset="utf-8" />
     <title>Jungle foodfeed</title>
@@ -63,7 +139,7 @@
             background-color: rgba(141, 141, 141, 0.2);
             z-index: 3;
             padding: 20px;
-            border-right: 5px solid rgb(181, 181, 181);
+            border-right: 2px solid rgb(158, 158, 158);
         }
 
         #map {
@@ -89,16 +165,24 @@
             border-radius: 0;
         }
 
+        .modal-body{
+            padding-bottom: 10px;
+        }
+
         .modal-footer {
             padding: 0;
             border-bottom: 0.1px solid black;
             border-bottom-right-radius: 0;
             border-bottom-left-radius: 0;
+            border-top: 0;
+            padding-bottom: 5px;
+            padding-right: 12px;
         }
 
         /* 피드 */
         .card {
             margin: 10px;
+            width: 16rem;
         }
 
         #search_name {
@@ -116,7 +200,7 @@
             z-index: 10;
             padding: 10px;
             width: 550px;
-            background-color: #c4c4c43d;
+            background-color: #a0a0a0a3;
             ;
             border-radius: 10px;
             right: 20px;
@@ -133,6 +217,46 @@
             top: 20px;
             right: 20px;
             z-index: 5;
+        }
+
+        .card-columns {
+            columns: 1;
+            overflow-y: scroll;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 90vh;
+            align-items: center;
+        }
+
+        .modal-header{
+            padding: 15px;
+        }
+
+        .modal-header:not(.click){
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header > div:not(.click){
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header p {
+            font-size: 0.8em;
+            color: gray;
+            margin-bottom: 0;
+        }
+
+        .txtarea{
+            resize: none;
+        }
+
+        .clickP{
+            margin-top: 10px;
         }
 
         /* desktop 규격 */
@@ -164,17 +288,19 @@
                 <h1 style="margin-left: 10px;">Jungle-foodfeed</h1>
             </div>
             <!-- 피드 -->
-            <div class="card" style="width: 18rem;">
-                <div class="card-body">
-                    <h5 class="card-title">상호명</h5>
-                    <p class="card-text">추가 정보</p>
-                    <div style="display: inline-block;">
-                        <a href="#" class="btn btn-primary">
-                            좋아요
-                            <img src="/static/heart_img.png" style="width: 25px; height: 25px;">
-                        </a>
+            <!-- 피드 -->
+            <div class="card-columns">
+                <div class="card" style="width: 18rem;">
+                    <div class="card-body">
+                        <h5 class="card-title">상호명</h5>
+                        <p class="card-text">추가 정보</p>
+                        <div style="display: inline-block;">
+                            <a href="#" class="btn btn-primary">
+                                좋아요
+                                <img src="/static/heart_img.png" style="width: 25px; height: 25px;">
+                            </a>
+                        </div>
                     </div>
-
                 </div>
             </div>
         </div>
@@ -206,7 +332,7 @@
                     // 주소 모듈 임포트
                     var geocoder = new kakao.maps.services.Geocoder();
 
-                    function getAdrr(x, y, is_type) {
+                    function getAdrr(x, y, is_type, place) {
                         // 좌표를 넣어준다
                         var coord = new kakao.maps.LatLng(x, y);
                         // 콜백함수
@@ -216,11 +342,15 @@
                                 if (is_type == 'search') {
                                     infowindow.setContent(`
           <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h5 class="modal-title search_title">${place.place_name}</h5>
+                    <p>주소 : ${result[0].address.address_name}</p>
+                </div>
+            </div>
             <div class="modal-body">
-                <div class="input-group flex-nowrap">
-                    <span class="input-group-text" id="addon-wrapping">상호명</span>
-                    <input id="searchInputKeyword" type="text" class="form-control" placeholder="상호명을 입력해주세요"
-                        aria-label="Username" aria-describedby="addon-wrapping" value="${place.place_name}">
+                <div class="input-group">
+                    <textarea class="form-control txtarea" aria-label="With textarea" placeholder="리뷰를 입력해주세요(선택)"></textarea>
                 </div>
             </div>
             <div class="modal-footer">
@@ -237,11 +367,17 @@
                                 } else {
                                     infowindow.setContent(`
           <div class="modal-content">
-            <div class="modal-body">
-                <div class="input-group flex-nowrap">
+            <div class="modal-header">
+                <div class="input-group flex-nowrap click">
                     <span class="input-group-text" id="addon-wrapping">상호명</span>
-                    <input id="searchInputKeyword" type="text" class="form-control" placeholder="상호명을 입력해주세요"
+                    <input id="searchInputKeyword" type="text" class="form-control search_title" placeholder="상호명을 입력해주세요"
                         aria-label="Username" aria-describedby="addon-wrapping" value="${result[0].address.address_name}">
+                </div>
+                <p class="clickP">주소 : ${result[0].address.address_name}</p>
+            </div>
+            <div class="modal-body">
+                <div class="input-group">
+                    <textarea class="form-control txtarea" aria-label="With textarea" placeholder="리뷰를 입력해주세요(선택)"></textarea>
                 </div>
             </div>
             <div class="modal-footer">
@@ -256,12 +392,13 @@
                 </button>
             </div>
           </div>
-`)}
-                                
-                    }
+`)
+                                }
+
+                            }
                         };
-                    // 처리 및 출력부
-                    return geocoder.coord2Address(coord.getLng(), coord.getLat(), callback);
+                        // 처리 및 출력부
+                        return geocoder.coord2Address(coord.getLng(), coord.getLat(), callback);
                     }
 
                     // 좌표를 넣어준다
@@ -363,11 +500,11 @@
                             if (is_type == 'search') {
                                 console.log('search' + place.y, place.x)
                                 hideMarkers()
-                                getAdrr(place.y, place.x, 'search')
+                                getAdrr(place.y, place.x, 'search', place)
 
                             } else {
                                 console.log('click' + place['Ma'], place['La'])
-                                getAdrr(place['Ma'], place['La'], 'click')
+                                getAdrr(place['Ma'], place['La'], 'click', null)
                             }
                             infowindow.open(map, marker);
                         });
