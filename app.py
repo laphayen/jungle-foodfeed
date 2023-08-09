@@ -42,13 +42,23 @@ def login():
     id = request.form['id']
     pw = request.form['pw']
     checkUser = list(dblog.login.find({'id':id}))
+    
+
+    access_token = create_access_token(identity=id)
+    refresh_token = create_refresh_token(identity=id)
+
+    # Set the JWTs and the CSRF double submit protection cookies
+    # in this response
+
     if len(checkUser) == 0:
         return jsonify({'result': 'fail', 'msg':'아이디가 존재하지 않습니다.'})
     elif not bcrypt.check_password_hash(checkUser[0]['pw'],pw):
         return jsonify({'result': 'fail', 'msg':'비밀번호가 틀렸습니다.'})
     else :
-        return jsonify({'result': 'success', 'id':id,'msg':'로그인 되었습니다!', 'access_token' : create_access_token(identity = id,
-											expires_delta = False)})
+        resp = jsonify({'result': 'success', 'id':id,'msg':'로그인 되었습니다!'})
+        set_access_cookies(resp, access_token)
+        set_refresh_cookies(resp, refresh_token)
+        return resp, 200
     
 #like feed
 @app.route('/api/like', methods=['POST'])
