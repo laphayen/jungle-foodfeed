@@ -27,9 +27,11 @@
             showFeeds();
         });
         //카드 생성
+        let allNames = []
         function showFeeds() {
             //1. .card-columns 의 내부 html 태그를 모두 삭제
             $('.card-columns').empty()
+            allNames = []
 
             //2. 서버에 1)GET 방식으로, 2)/api/list 라는 주소로 feed_list를 요청합니다.
             $.ajax({
@@ -42,13 +44,30 @@
                     curFeed = feeds
                     console.log(feeds)
                     // 4. for 문을 활용하여 feeds 배열의 요소를 차례대로 조회합니다.
+                    if(feeds.length == 0){
+                        $('.left').css('display','none')
+                        return
+                    } else $('.left').css('display','block')
                     for (let i = 0; i < feeds.length; i++) {
                         let feed = feeds[i]
                         // 5. star[i] 요소의 name, url, img_url, recent, like 키 값을 활용하여 값을 조회합니다.
                         let name = feed['name']
+                        allNames.push(name)
                         let like = feed['like']
                         let loca = feed['loca']
                         let ids = feed['ID']
+                        let comment = feed['Comment']
+                        let comment_len = 0
+                        try{
+                        console.log(id in comment)
+                        }catch{
+                            console.log(234)
+                        }
+                        try {
+                            comment_len = Object.values(comment).length
+                        } catch (error) {
+                            comment_len = 0
+                        }
                         let is_contain = false
                         for (let i = 0; i < ids.length; i++) {
                             if (ids[i] == $('#id').val()) is_contain = true
@@ -56,17 +75,17 @@
                         let tempHtml = ''
                         if (is_contain) {
                             tempHtml = `
-                            <div class="card" style="width: 18rem;" >
+                            <div class="card" style="width: 18rem;" onmouseenter="clickCardDiv(this)">
                                 <div class="card-body">
                                     <h5 class="card-title">${name}</h5>
                                     <p class="card-text">${loca}</p>
                                     <div style="display: inline-block;">
                                         <a href="#" class="btn btn-primary" onclick="clickFeedLikeBtn('${name}', '${loca}')">
-                                            좋아요 ${like}
+                                            좋아요 (${like})
                                             <img src="/static/heart_img.png" style="width: 25px; height: 25px;">
                                         </a>
-                                        <a href="#" class="btn btn-primary" onclick="clickCommentBtn(this)">
-                                            댓글 보기
+                                        <a href="#" class="btn btn-${comment_len == 0?'secondary':'primary'}" onclick="clickCommentBtn(this)">
+                                            댓글 (${comment_len})
                                             <img src="/static/comment_img.png" style="width: 25px; height: 25px;">
                                         </a>
                                     </div>
@@ -75,17 +94,17 @@
                             `
                         } else {
                             tempHtml = `
-                            <div class="card" style="width: 18rem;" >
+                            <div class="card" style="width: 18rem;" onmouseenter="clickCardDiv(this)">
                                 <div class="card-body">
                                     <h5 class="card-title">${name}</h5>
                                     <p class="card-text">${loca}</p>
                                     <div style="display: inline-block;">
                                         <a href="#" class="btn btn-secondary" onclick="clickFeedLikeBtn('${name}', '${loca}')">
-                                            좋아요 ${like}
+                                            좋아요 (${like})
                                             <img src="/static/heart_img.png" style="width: 25px; height: 25px;">
                                         </a>
-                                        <a href="#" class="btn btn-primary" onclick="clickCommentBtn(this)">
-                                            댓글 보기
+                                        <a href="#" class="btn btn-${comment_len == 0?'secondary':'primary'}" onclick="clickCommentBtn(this)">
+                                            댓글 (${comment_len})
                                             <img src="/static/comment_img.png" style="width: 25px; height: 25px;">
                                         </a>
                                     </div>
@@ -96,14 +115,15 @@
                         $('.card-columns').append(tempHtml)
 
                     }
+                    search_all()
                 }
             });
         }
-        // function clickCardDiv(e) {
-        //     console.log($(e).find('.card-title').text())
-        //     let name = $(e).find('.card-title').text()
-        //     search_name(name,'inFeed')
-        // }
+        function clickCardDiv(e) {
+            console.log($(e).find('.card-title').text())
+            let name = $(e).find('.card-title').text()
+            search_name(name,'inFeed')
+        }
         function logOut() {
             window.location.href = '/logOut';
         }
@@ -114,14 +134,8 @@
             } else {
                 placeName = $('.search_title').text()
             }
-            let comment = ''
-            if ($('.txtarea').val() == '') {
-                alert('리뷰를 입력해주세요')
-                return
-            }
-            else {
-                comment = $('.txtarea').val()
-            }
+            let comment = $('.txtarea').val()
+            
             $.ajax({
                 type: "POST",
                 url: "/api/like",
@@ -133,9 +147,10 @@
                     }
                     else {
                         alert(response['msg']);
-
+                        
                     }
                     $('.txtarea').val('')
+                    closeModal()
                     showFeeds();
                 }
             });
@@ -210,6 +225,28 @@
             overflow: hidden;
             height: 100%;
             width: 100%;
+            scrollbar-color: rgba(141, 141, 141, 0.2);
+        }
+
+        /* ( 크롬, 사파리, 오페라, 엣지 ) 동작 */
+.scroll::-webkit-scrollbar {
+  display: none;
+}
+.scroll {
+  -ms-overflow-style: none; /* 인터넷 익스플로러 */
+  scrollbar-width: none; /* 파이어폭스 */
+}
+        .titleBar{
+            height: 15%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 0.1px solid #8080808a;
+            box-shadow: 0px 2px 5px gray;
+            position: relative;
+            z-index: 5;
+            color: #616161;
         }
 
         .wrap {
@@ -220,8 +257,9 @@
         div.left {
             background-color: rgba(141, 141, 141, 0.2);
             z-index: 3;
-            padding: 20px;
-            border-right: 2px solid rgb(158, 158, 158);
+            border-right: 1px solid #b8b8b8;
+            height: 100vh;
+            box-shadow: 0px 0px 15px gray;
         }
 
         #map {
@@ -233,6 +271,7 @@
         .right {
             z-index: 0;
             width: 100vw;
+            height: 100vh;
         }
 
         .search {
@@ -251,7 +290,7 @@
             padding-bottom: 10px;
         }
 
-        .modal-footer {
+        .modal-footer:not(.comment_footer) {
             padding: 0;
             border-bottom: 0.1px solid black;
             border-bottom-right-radius: 0;
@@ -262,7 +301,7 @@
         }
 
         /* 피드 */
-        .card {
+        .card:not(.in-modal-comment) {
             margin: 10px;
             width: 16rem;
             box-shadow: 0px 2px 7px gray;
@@ -304,11 +343,11 @@
         .card-columns {
             columns: 1;
             overflow-y: scroll;
-            overflow-x: hidden;
             display: flex;
             flex-direction: column;
-            height: 90vh;
+            height: 85%;
             align-items: center;
+            padding: 10px;
         }
 
         .modal-header {
@@ -341,6 +380,23 @@
             margin-top: 10px;
         }
 
+        .comment-modal-text{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow-y: scroll;
+        }
+
+        .comment-modal-content{
+            border: 1px solid #b8b8b8;
+            border-radius: 20px;
+            width: fit-content;
+        }
+
+        .footerComment{
+            border-bottom: 0px;
+        }
         /* desktop 규격 */
         @media screen and (min-width: 1000px) {}
 
@@ -367,10 +423,11 @@
         <input id="id" hidden value="{{id}}">
         <!-- 로그아웃 -->
         <div class="left">
-            <div>
-                <h1 style="margin-left: 10px;">Jungle-foodfeed</h1>
-            </div>
             <!-- 피드 -->
+            <div class="titleBar">
+                <h2>Jungle</h2>
+                <h2>FoodFeed</h2>
+            </div>
             <!-- 피드 -->
             <div class="card-columns">
                 <div class="card" style="width: 18rem;">
@@ -390,14 +447,14 @@
         <!-- 댓글 보기 모달창 -->
         <div class="modal comment-modal" tabindex="-1" style="display: none;">
             <div class="modal-dialog">
-                <div class="modal-content">
+                <div class="modal-content comment-modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title comment-modal-title"></h5>
                     </div>
                     <div class="comment-modal-text">
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                    <div class="modal-footer comment_footer">
+                        <button type="button" class="btn btn-secondary footerComment" data-dismiss="modal"
                             onclick="clickCommentModalCloseBtn()">Close</button>
                     </div>
                 </div>
@@ -410,7 +467,8 @@
                     aria-label="Recipient's username" aria-describedby="button-addon2">
                 <button class="btn btn-primary " type="button" id="button-addon2"
                     onclick="search_name($('#search_name').val(),'inMap')">검색</button>
-                <!-- 로그아웃 -->
+                    <button id="logoutbtn" type="button" class="btn btn-success" onclick="search_all()">전체 피드 위치 보기</button>
+                    <!-- 로그아웃 -->
                 <button id="logoutbtn" type="button" class="btn btn-danger" onclick="logOut()">로그아웃</button>
             </div>
             <div>
@@ -623,19 +681,57 @@
                             console.log(data);
                         } else if (status === kakao.maps.services.Status.ZERO_RESULT) {
                             if (search_count == 0) {
-                                alert('검색 결과가 존재하지 않습니다.');
+                                // alert('검색 결과가 존재하지 않습니다.');
                                 search_count++
                             }
                             return;
                         } else if (status === kakao.maps.services.Status.ERROR) {
                             if (search_count == 0) {
-                                alert('검색 결과 중 오류가 발생했습니다.');
+                                // alert('검색 결과 중 오류가 발생했습니다.');
                                 search_count++
                             }
                             return;
                         }
                         hideMarkers()
                         unSetMarkers()
+                        for (var i = 0; i < data.length; i++) {
+                            displayMarker(data[i], 'search');
+                        }
+                        // 검색된 장소 위치를 기준으로 지도 범위를 재설정합니다
+                        map.setBounds(bounds);
+                    }
+
+                    function search_all(name) {
+                        hideMarkers()
+                        // 장소 검색 객체를 생성합니다
+                        var ps = new kakao.maps.services.Places();
+                        unSetMarkers(map)
+                        ps.setMap(map);
+                        // 키워드로 장소를 검색합니다
+                        for(let i = 0; i<allNames.length;i++){
+                            ps.keywordSearch(allNames[i], placesSearchCBAll, useMapBounds = true);   
+                        }
+                        search_count = 0
+                        closeModal()
+                    }
+
+                    function placesSearchCBAll(data, status, pagination) {
+                        if (status === kakao.maps.services.Status.OK) {
+                            // 데이터 확인
+                            console.log(data);
+                        } else if (status === kakao.maps.services.Status.ZERO_RESULT) {
+                            if (search_count == 0) {
+                                // alert('검색 결과가 존재하지 않습니다.');
+                                search_count++
+                            }
+                            return;
+                        } else if (status === kakao.maps.services.Status.ERROR) {
+                            if (search_count == 0) {
+                                // alert('검색 결과 중 오류가 발생했습니다.');
+                                search_count++
+                            }
+                            return;
+                        }
                         for (var i = 0; i < data.length; i++) {
                             displayMarker(data[i], 'search');
                         }

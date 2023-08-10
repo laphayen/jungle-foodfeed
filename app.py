@@ -24,6 +24,8 @@ def home():
 
 @app.route('/main')
 def main():
+   if not 'id' in session:
+     return make_response(redirect(url_for('home'))) 
    print(session['id'])
    return render_template('index.html',id=session['id'])
 
@@ -75,7 +77,8 @@ def login():
 #like feed
 @app.route('/api/like', methods=['POST'])
 def like_feed():
-   
+   if not 'id' in session:
+     return jsonify({'result':'fail', 'msg':'세션이 만료되어 로그아웃 됩니다.'})
    #클라이언트가 전달한 name_give를 name_receive 변수에 넣기 
    name_receive = request.form['name_give']
    loca_receive = request.form['loca_give']
@@ -104,11 +107,11 @@ def like_feed():
          if checkID and isinstance(checkID['ID'], list):
             #배열일 경우 하나만 삭제
             dblog.feeds.update_one({'name': name_receive, 'loca':loca_receive}, {'$pull':{'ID':ID_receive}})
-            return jsonify({'result':'cancel','msg':'좋아요 취소'})
+            return jsonify({'result':'cancel','msg':'좋아요를 취소합니다.'})
          else:
             #필드일 경우 삭제
             dblog.feeds.delete_one({'name': name_receive, 'loca':loca_receive, 'ID':ID_receive})
-            return jsonify({'result':'cancel', 'msg':'좋아요 취소'})
+            return jsonify({'result':'cancel', 'msg':'좋아요를 취소합니다.'})
 
          
       else:
@@ -118,21 +121,26 @@ def like_feed():
          plus_like = feed['like'] + 1
          #plus한 좋아요 수 업데이트
          dblog.feeds.update_one({'name': name_receive, 'loca':loca_receive}, {'$set': {'like': plus_like}})
-         dblog.feeds.update_one({'name': name_receive, 'loca':loca_receive}, {'$set': {f'Comment.{ID_receive}': comment_receive},'$addToSet': {'ID': ID_receive}})
+         if comment_receive != '':
+            dblog.feeds.update_one({'name': name_receive, 'loca':loca_receive}, {'$set': {f'Comment.{ID_receive}': comment_receive},'$addToSet': {'ID': ID_receive}})
          #DB에서 ID 추가
          dblog.feeds.update_one({'name': name_receive, 'loca':loca_receive}, {'$push':{'ID':ID_receive}})
-         return jsonify({'result':'success', 'msg':'좋아요 완료'})
+         return jsonify({'result':'success', 'msg':'이 맛집을 좋아합니다.'})
 
    else:
       print('카드 최초 업데이트')
       #해당 DB에 최초로 상호가 등록된거니까 바로 insert
-      dblog.feeds.insert_one({'name':name_receive, 'like':1, 'loca': loca_receive, 'ID':[ID_receive], 'Comment':{ID_receive: comment_receive}})
-   
-      return jsonify({'result':'success', 'msg':'좋아요 완료'})
+      if comment_receive != '':
+        dblog.feeds.insert_one({'name':name_receive, 'like':1, 'loca': loca_receive, 'ID':[ID_receive], 'Comment':{ID_receive: comment_receive}})
+      else :
+         dblog.feeds.insert_one({'name':name_receive, 'like':1, 'loca': loca_receive, 'ID':[ID_receive]})
+      return jsonify({'result':'success', 'msg':'이 맛집을 좋아합니다.'})
 
 #feeds 불러오기
 @app.route('/api/list', methods=['GET'])
 def show_feeds():
+   if not 'id' in session:
+     return make_response(redirect(url_for('home'))) 
    # 1. db에서 좋아요 0인 데이터 삭제
    dblog.feeds.delete_many({'like' : 0})
    # 2. db에서 feeds 목록 전체를 검색합니다. ID는 제외하고 like 가 많은 순으로 정렬합니다.
@@ -143,6 +151,8 @@ def show_feeds():
 
 @app.route('/api/comment', methods=['POST'])
 def show_comment():
+   if not 'id' in session:
+     return make_response(redirect(url_for('home'))) 
    name_receive = request.form['name_give']
    loca_receive = request.form['loca_give']
    feed = dblog.feeds.find_one({'name':name_receive, 'loca':loca_receive})
@@ -158,7 +168,7 @@ def show_comment():
       print(comment_list)
       return jsonify({'result':'success', 'id_list':id_list, 'comment_list':comment_list})
    else:
-      return jsonify({'result':'None', 'msg': '댓글이 없습니다'})
+      return jsonify({'result':'None', 'msg': '등록된 댓글이 없습니다'})
 
 
 if __name__ == '__main__':
