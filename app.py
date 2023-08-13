@@ -5,9 +5,8 @@ from flask_bcrypt import Bcrypt
 import random
  
 app = Flask(__name__)
-client = MongoClient('mongodb://seungtae:jeon8175@13.125.153.232', 27017)
+client = MongoClient('mongodb://__:__@13.125.153.232', 27017)
 dblog = client.jungle_food_feed #db명
-headers = {'User-Agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36'}
 
 app.config.update(
 			DEBUG = True,
